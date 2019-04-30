@@ -120,6 +120,11 @@ public class Main {
             
             int winner;
             while (true) {
+                if (board.draw())
+                {
+                    winner = 0;
+                    break;
+                }
                 p1.sendGrid(board); 
                 board.addPlayerMove(1, p1.getMove());
                 if (board.playerWon(1)) {
@@ -127,6 +132,11 @@ public class Main {
                     break;
                 }
 
+                if (board.draw())
+                {
+                    winner = 0;
+                    break;
+                }
                 p2.sendGrid(board);				
                 board.addPlayerMove(2, p2.getMove());
                 if (board.playerWon(2)) {
@@ -135,8 +145,13 @@ public class Main {
                 }
             }
 
-            System.out.printf("The winner is %d\n", winner);
-            
+            if(winner != 0) {
+                System.out.printf("The winner is %d\n", winner);
+            }
+            else{
+                System.out.print("The game was a draw\n");
+            }
+
             p1.close();
             p2.close();
             

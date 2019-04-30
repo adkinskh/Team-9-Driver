@@ -73,6 +73,17 @@ public class Board {
         }
         return -1;
     }
+
+    //determines if the player can make a move
+    public boolean draw()
+    {
+        for (int i = 0; i < column; i++) {
+            if (determineRow(column) != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
     
     /** Add Player's move to Game Board
      * @param player should only be 1 or 0. No checks are performed.
