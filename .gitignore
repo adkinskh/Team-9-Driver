@@ -8,8 +8,8 @@
 .gradle
 build/
 gradle.properties
-.idea
-.xml
+*.idea
+*.xml
 
 ### Racket Executables ### 
 connect-four-naive
