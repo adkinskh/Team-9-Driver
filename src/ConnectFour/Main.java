@@ -11,10 +11,10 @@ import java.lang.ProcessBuilder.Redirect;
 // API:
 // {"grid": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}
 // {"move":2}
-         
+
 // Rename to 'Driver'?
 public class Main {
-    
+
     //
     // --interpreter-1 <path>
     // --program-1 <path>
@@ -28,16 +28,18 @@ public class Main {
     // passed as an argument to it. The program args will
     // always be used.
     //
-    public static void main(String[] args) { 
-        
-        int height = 7;
-        int width = 8;
+
+    public static void main(String[] args) {
+
+        int height = 5;
+        int width = 10;
+        int tGames = 1;
         
         String arg_i1 = "";
         String arg_p1 = "";
         String arg_i2 = "";
         String arg_p2 = "";
-        
+
         for (int i = 0; i < args.length; i++) {
 
             if (!args[i].startsWith("--")) {
@@ -45,11 +47,11 @@ public class Main {
                 return;
             }
 
-            if (i+1 == args.length) {
+            if (i + 1 == args.length) {
                 System.out.printf("option '%s' requires value\n", args[i]);
                 return;
             }
-            
+
             switch (args[i]) {
                 case "--interpreter-1":
                     arg_i1 = args[++i];
@@ -69,13 +71,16 @@ public class Main {
                 case "--width":
                     width = Integer.parseInt(args[++i]);
                     break;
+                case "--tGames":
+                    tGames = Integer.parseInt(args[++i]);
+                    break;
+
                 default:
                     System.out.printf("switch '%s' not recognized\n", args[i]);
                     return;
             }
         }
-        
-        Board board = new Board(height, width, 4);
+
         PlayerProcess p1;
         PlayerProcess p2;
         
@@ -110,54 +115,56 @@ public class Main {
         //if (!arg_p2.equals(""))
         //    cmd2.add(0, arg_p2);
         //cmd2.add(0, arg_i2);
-        
-        try {
-            
-            //System.out.println("DEBUG: " + cmd1);
-            //System.out.println("DEBUG: " + cmd2);
-            p1 = new PlayerProcess(pb.command(cmd1).start());
-            p2 = new PlayerProcess(pb.command(cmd2).start());
-            
-            int winner;
-            while (true) {
-                if (board.draw())
-                {
-                    winner = 0;
-                    break;
-                }
-                p1.sendGrid(board); 
-                board.addPlayerMove(1, p1.getMove());
-                if (board.playerWon(1)) {
-                    winner = 1;
-                    break;
+
+        for (int x = 0; x < tGames; ++x) {
+            Board board = new Board(height, width, 4);
+
+            try {
+
+                //System.out.println("DEBUG: " + cmd1);
+                //System.out.println("DEBUG: " + cmd2);
+                p1 = new PlayerProcess(pb.command(cmd1).start());
+                p2 = new PlayerProcess(pb.command(cmd2).start());
+
+                int winner = -1;
+                while (true) {
+                    p1.sendGrid(board);
+                    board.addPlayerMove(1, p1.getMove());
+                    if (board.playerWon(1)) {
+                        winner = 1;
+                        break;
+                    }
+                    if (board.draw()) {
+                        winner = 0;
+                        break;
+                    }
+
+                    p2.sendGrid(board);
+                    board.addPlayerMove(2, p2.getMove());
+                    if (board.playerWon(2)) {
+                        winner = 2;
+                        break;
+                    }
+                    if (board.draw()) {
+                        winner = 0;
+                        break;
+                    }
                 }
 
-                if (board.draw())
-                {
-                    winner = 0;
-                    break;
+                if (winner != 0) {
+                    System.out.printf("The winner is player %d\n", winner);
                 }
-                p2.sendGrid(board);				
-                board.addPlayerMove(2, p2.getMove());
-                if (board.playerWon(2)) {
-                    winner = 2;
-                    break;
+                else {
+                    System.out.print("The game was a draw\n");
                 }
-            }
 
-            if(winner != 0) {
-                System.out.printf("The winner is %d\n", winner);
-            }
-            else{
-                System.out.print("The game was a draw\n");
-            }
+                p1.close();
+                p2.close();
 
-            p1.close();
-            p2.close();
-            
-        } catch (IOException e) {
-            System.out.println(e);
-            return;
-        } 
+            } catch (IOException e) {
+                System.out.println(e);
+                return;
+            }
+        }
     }
 }

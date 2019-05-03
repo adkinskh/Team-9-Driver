@@ -48,26 +48,26 @@ public class Board {
         this.row = row;
         this.column = column;
         this.connectNumber = connectNumber;
-        grid = new int[row][column];
+        grid = new int[column][row];
         loadBoardEmpty();
     }
 
     private void loadBoardEmpty() {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < column; j++) {
-                grid[i][j] = 0;
+                grid[j][i] = 0;
             }
         }
     }
 
-    /* Check all rows for that specific column 
-     * parameter column - the column to check 
+    /* Check all rows for that specific column
+     * parameter column - the column to check
      * returns the row number to populate or -1 if the column is full
      * */
     private int determineRow(int column) {
- 
-        for (int i = 0; i < row; i++) {
-            if (grid[i][column] == 0) {
+
+        for (int i = row-1; i >= 0; i--) {
+            if (grid[column][i] == 0) {
                 return i;
             }
         }
@@ -90,17 +90,16 @@ public class Board {
      * @param column the column to drop the token into.
      * */
     public void addPlayerMove(int player, int column) {
- 
         int add = determineRow(column);
         if (add != -1) {
-            grid[add][column] = player;
+            grid[column][add] = player;
         }
     }
-    
+
     /** Useful for debugging
      * */
     public void printBoard() {
- 
+
         System.out.print("            Player Board");
         System.out.print('\n');
         System.out.print("-------------------------------------");
@@ -121,18 +120,15 @@ public class Board {
         System.out.print('\n');
         System.out.print('\n');
     }
-    
+
     private boolean checkVerticalWin(int whichPlayer) {
-    
-        int fromRow = (connectNumber - 1); // 3
-        int toRow = (row - 1);             // 6
-        int fromColumn = 0;                // 0
-        int toColumn = (column - 1);       // 7
-        
-        for (int i = fromRow; i <= toRow; i++) {
- 
-            for (int j = fromColumn; j <= toColumn; j++) {
- 
+
+        int fromColumn = (connectNumber - 1); // 3
+
+        for (int i = fromColumn; i < column; i++) {
+
+            for (int j = 0; j < row; j++) {
+
                 int counter = 0;
                 for (int k = 0; k < connectNumber; k++) {
                     if (grid[i-k][j] == whichPlayer) {
@@ -146,18 +142,14 @@ public class Board {
         }
         return false;
     }
-    
+
     private boolean checkHorizontalWin(int whichPlayer) {
- 
-        int fromRow = 0;                         // 0
-        int toRow = (row - 1);                   // 6
-        int fromColumn = 0;                      // 0
-        int toColumn = (column - connectNumber); // 4
-        
-        for (int i = fromRow; i <= toRow; i++) {
- 
-            for (int j = fromColumn; j <= toColumn; j++) {
- 
+        int toRow = (row - connectNumber); // 4
+
+        for (int i = 0; i < column; i++) {
+
+            for (int j = 0; j <= toRow; j++) {
+
                 int counter = 0;
                 for (int k = 0; k < connectNumber; k++) {
                     if (grid[i][j + k] == whichPlayer) {
@@ -171,18 +163,12 @@ public class Board {
         }
         return false;
     }
-    
+
     private boolean checkDiagnolLeftWin(int whichPlayer) {
- 
-        int fromRow = (connectNumber - 1);    // 3
-        int toRow = (row - 1);                // 6
-        int fromColumn = (connectNumber - 1); // 3
-        int toColumn = (column - 1);          // 7
-        
-        for (int i = fromRow; i <= toRow; i++) {
- 
-            for (int j = fromColumn; j <= toColumn; j++) {
- 
+
+        for (int i = connectNumber - 1; i < column; i++) {
+            for (int j = connectNumber - 1; j < row; j++) {
+
                 int counter = 0;
                 for (int k = 0; k < connectNumber; k++) {
                     if (grid[i - k][j - k] == whichPlayer) {
@@ -196,18 +182,15 @@ public class Board {
         }
         return false;
     }
-    
+
     private boolean checkDiagnolRightWin(int whichPlayer) {
- 
-        int fromRow = (connectNumber - 1);       // 3
-        int toRow = (row - 1);                   // 6
-        int fromColumn = 0;                      // 0
-        int toColumn = (column - connectNumber); // 4
-        
-        for (int i = fromRow; i <= toRow; i++) {
- 
-            for (int j = fromColumn; j <= toColumn; j++) {
- 
+
+        int toRow = (row - connectNumber);
+
+        for (int i = connectNumber -1; i < column; i++) {
+
+            for (int j = 0; j <= toRow; j++) {
+
                 int counter = 0;
                 for (int k = 0; k < connectNumber; k++) {
                     if (grid[i - k][j + k] == whichPlayer) {
@@ -223,18 +206,18 @@ public class Board {
     }
 
     public String toString() {
-        return jsonConverter.toJson(this);    
+        return jsonConverter.toJson(this);
     }
-    
+
     /** Determines if a player has won the game
-     * @param player check to see if this player has won 
-     * @return whether or not the player has connected the minimum 
+     * @param player check to see if this player has won
+     * @return whether or not the player has connected the minimum
      * number of their pieces.
      * */
     public boolean playerWon(int player) {
         return (
-            checkVerticalWin(player)    ||
-            checkHorizontalWin(player)  ||
+            checkVerticalWin(player) ||
+            checkHorizontalWin(player) ||
             checkDiagnolLeftWin(player) ||
             checkDiagnolRightWin(player)
         );
